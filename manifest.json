@@ -1,8 +1,8 @@
 {
-  "name": "SocketIO DOM Controller",
+  "name": "Langic Robot Controller",
   "version": "1.0",
   "manifest_version": 3,
-  "description": "通过 Socket.IO 接收服务端指令并操作 DOM",
+  "description": "机器人控制器",
   "permissions": [
     "activeTab",
     "scripting",
@@ -26,6 +26,6 @@
     "<all_urls>"
   ],
   "action": {
-    "default_title": "Open Popup in Tab"
+    "default_title": "Robot"
   }
 }

@@ -137,27 +137,22 @@ let langicApi = {
 				// 根据DOM规则查找某个元素
 				re = langicOpt.findElement(cmd.selector);
 				break;
-
 			case 'CLICK_ELEMENT':
 				// 根据DOM规则点击某个元素
 				re = langicOpt.clickElement(cmd.selector);
 				break;
-
 			case 'FOCUS_INPUT':
 				// 根据DOM规则点击输入框并获得焦点
 				re = langicOpt.focusInput(cmd.selector);
 				break;
-
 			case 'SCROLL_AREA':
 				// 根据DOM规则选择某个区域并进行上下滚动
 				re = langicOpt.scrollArea(cmd.selector, cmd.scrollDistance);
 				break;
-
 			case 'SELECT_VALUE':
 				// 根据DOM规则选择某个SELECT的值
 				re = langicOpt.selectValue(cmd.selector, cmd.value);
 				break;
-
 			case 'CLICK_COORDINATE':
 				// 点击网页指定坐标
 				re = langicOpt.clickCoordinate(cmd.x, cmd.y);
@@ -167,6 +162,9 @@ let langicApi = {
 				break;
 			case 'SET_ATTR':
 				re = langicOpt.setAttr(cmd.selector, cmd.attr, cmd.value);
+				break;
+			case 'GET_HTML':
+				re = langicOpt.getHtml(cmd.selector);
 				break;
 			default:
 				re = {code:0, msg:`未知命令: ${cmd.action}`}

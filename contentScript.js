@@ -118,6 +118,7 @@ function LangicOpt() {
 
 	this.getHtml = function (selector) {
 		const elem = doc.querySelector(selector);
+		console.log(elem,selector);
 		if (elem) {
 			return {code:1, msg:elem.innerHTML}
 		} else {

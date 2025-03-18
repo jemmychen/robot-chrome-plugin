@@ -2,6 +2,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const loginContainer = document.getElementById("login-container");
     const contentContainer = document.getElementById("content-container");
     const loginBtn = document.getElementById("login-btn");
+    const runBtn = document.getElementById("run-btn");
     const logoutBtn = document.getElementById("logout-btn");
     const errorMsg = document.getElementById("error-msg");
     const messageList = document.getElementById("message-list");
@@ -10,8 +11,31 @@ document.addEventListener("DOMContentLoaded", function () {
     chrome.storage.local.get("langicToken", function (data) {
         if (data.langicToken) {
             loginSuccess();
+        }else{
+            logout();
         }
     });
+
+    runBtn.addEventListener("click", function () {
+        chrome.storage.local.get("isRunning", function (data) {
+            console.log(data);
+            //如果存在
+            if (data && data.isRunning) {
+                chrome.storage.local.set({ isRunning: false }, function () {
+                    chrome.runtime.sendMessage({ action: "stop" });
+                    runBtn.textContent = "已停止，点击启动";
+                })
+                return;
+            }else{
+                chrome.storage.local.set({ isRunning: true }, function () {
+                    chrome.runtime.sendMessage({ action: "run" });
+                    runBtn.textContent = "运行中，点击停止";
+                })
+                return;
+            }
+        })
+    })
+
 
     // 登录按钮事件
     loginBtn.addEventListener("click", function () {
@@ -23,7 +47,7 @@ document.addEventListener("DOMContentLoaded", function () {
             return;
         }
 
-        fetch("http://localhost:3000/login", {
+        fetch("http://3.143.217.163:3030/login", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ username, password })
@@ -43,11 +67,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // 退出登录
     logoutBtn.addEventListener("click", function () {
-        chrome.storage.local.remove("token", function () {
-            loginContainer.style.display = "block";
-            contentContainer.style.display = "none";
-            chrome.runtime.sendMessage({ action: "disconnect_socket" });  // 断开 WebSocket
-        });
+        logout();
     });
 
     // 显示消息列表
@@ -61,12 +81,22 @@ document.addEventListener("DOMContentLoaded", function () {
         chrome.runtime.sendMessage({ action: "login_success" });
     }
 
+    function logout(){
+        loginContainer.style.display = "block";
+        contentContainer.style.display = "none";
+        chrome.storage.local.remove("langicToken");
+        chrome.runtime.sendMessage({ action: "disconnect_socket" }); 
+    }
+
     // 监听 WebSocket 消息
     chrome.runtime.onMessage.addListener(function (message) {
         if (message.action === "new_message") {
             const li = document.createElement("li");
             li.textContent = message.data;
             messageList.appendChild(li);
+        }
+        if(message.action === "disconnect_socket"){
+            logout();
         }
     });
 });

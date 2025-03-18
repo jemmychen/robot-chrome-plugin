@@ -1,4 +1,4 @@
-
+//deperated for now
 let langicRunFlows = async function (flows) {
     for (let cmd of flows) {
         if (cmd.type == 'newpage') {
@@ -35,6 +35,13 @@ let langicRunStep = async function (cmd) {
     const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
     let re = {};
     switch (cmd.type) {
+        case 'newtab':
+            await new Promise((resolve, reject) => {
+                chrome.tabs.create({ url: "about:blank" }, (tab) => {
+					resolve();
+                });
+            });
+            re = {code:1, msg:"", data:""};
         case 'openurl':
             await setTabUrl(cmd.data.url);
             await sleep(cmd.data.delay_after * 1000);

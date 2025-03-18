@@ -5,8 +5,8 @@ importScripts('socket.io.min.js');
 importScripts('actions.js');
 
 // 替换为你的服务端地址
-const SERVER_URL = "http://localhost:3000";
-let socket;
+const SERVER_URL = "http://3.143.217.163:3030";
+let localsocket = null;
 let currentTabId = 0;
 
 chrome.action.onClicked.addListener(function() {
@@ -19,38 +19,36 @@ chrome.action.onClicked.addListener(function() {
     });
 });
 
-async function initSocketConnection(token, tabId) {
-	currentTabId = tabId;
-	socket = io(SERVER_URL, {
+async function initSocketConnection(token) {
+	console.log("initSocketConnection",token);
+	localsocket = io(SERVER_URL, {
 		transports: ['websocket'],
 		reconnection: true,
 		reconnectionDelay: 3000,
 		auth: {
-			token: token,
-			tabid: tabId
+			token: token
 		}
 	});
 
 	// Socket 连接成功
-	socket.on('connect', async () => {
+	localsocket.on('connect', async () => {
 		console.log('Socket.IO connected');
 
-		socket.on('flows', async (flows, callback) => {
-			langicRunFlows(flows);
-		})
+		// socket.on('flows', async (flows, callback) => {
+		// 	langicRunFlows(flows);
+		// })
 
-		socket.on('cmd', async (cmd, callback) => {
+		localsocket.on('cmd', async (cmd, callback) => {
 			let re = await langicRunStep(cmd);
 			callback(re);
 		})
 	});
 
 	// Socket 断开
-	socket.on('disconnect', () => {
+	localsocket.on('disconnect', () => {
 		console.log('Socket.IO disconnected');
 	});
 }
-
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 	console.log("background message",request);
@@ -58,12 +56,24 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         chrome.storage.local.get("langicToken", function (data) {
 			console.log("token",data);
             if (data.langicToken) {
-				chrome.tabs.create({ url: "about:blank" }, (tab) => {
-					initSocketConnection(data.langicToken, tab.id);
-				});
+				// chrome.tabs.create({ url: "about:blank" }, (tab) => {
+					initSocketConnection(data.langicToken);
+				// });
             }
         });
     }
+	if(request.action === "disconnect_socket"){
+		if(localsocket){
+			localsocket.disconnect();
+		}
+	}
+	if(request.action === "run"){
+		localsocket.emit('run');
+	}
+	if(request.action === "stop"){
+		localsocket.emit('stop');
+	}
+
 	return true;
 });
 

@@ -33,6 +33,7 @@ let langicRunFlows = async function (flows) {
 //执行命令
 let langicRunStep = async function (cmd) {
     const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+    if(tab == undefined || tab.id != undefined) return {code:-1, msg:"当前无标签页", data:""};
     let re = {};
     switch (cmd.type) {
         case 'newtab':
